@@ -1,0 +1,32 @@
+name: SDL Banned Functions Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  scan-banned-functions:
+    name: Scan for SDL banned functions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0
+
+      - name: Deploy SDL banned functions scanner
+        run: |
+          # Define the list of banned SDL functions
+          banned_functions=("strcpy" "strncpy" "strcat" "strncat" "sprintf" "snprintf" "vsprintf" "vsnprintf" "gets")
+          # Scan the code for banned functions
+          echo "Scanning code for SDL banned functions..."
+          for banned_function in "${banned_functions[@]}"; do
+              if grep -rnw -E "\\b$banned_function\\b" ./src; then
+                  echo "Test failed! SDL banned function '$banned_function' found in the code."
+                  exit 1
+              fi
+            done
+          echo "Test passed! No SDL banned functions found in the code."
